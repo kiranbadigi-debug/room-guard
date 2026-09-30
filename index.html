@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Room Guard for Hillview Stays (prototype)</title>
+<title>Slot Shield for Hillview Stays (prototype)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
@@ -147,29 +147,24 @@ input[type=range]{accent-color:var(--hibiscus);padding:0;border:0;background:non
 .steps .ms{color:var(--leaf)}
 details summary{cursor:pointer;font-weight:600;color:var(--peacock)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+/* Full-screen agent layout */
+html,body{height:100%}
+.layout{display:block;padding:0;max-width:none;margin:0;height:100%}
+.phone{width:100%;max-width:none;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+.top{padding-left:max(18px,calc((100% - 760px)/2));padding-right:max(18px,calc((100% - 760px)/2))}
+.screen{padding:16px max(16px,calc((100% - 760px)/2)) 96px}
+.tabs{padding:0 max(0px,calc((100% - 760px)/2))}
+.fab{right:max(16px,calc((100% - 760px)/2 + 16px))}
+.toast{left:max(16px,calc((100% - 760px)/2 + 16px));right:max(16px,calc((100% - 760px)/2 + 16px))}
 </style>
 </head>
 <body>
 <div class="layout">
-  <aside class="guide" aria-label="Demo guide">
-    <div class="brand"><span aria-hidden="true" class="ms">smart_toy</span>Razorpay Agent Studio · Hospitality</div>
-    <h1>Room Guard</h1>
-    <p>An AI agent that helps small hotels decide how much advance to take on direct bookings, collects it through Razorpay payment links, and refills rooms when guests cancel.</p>
-    <ol>
-      <li><span>Start on the setup screen, then open <b>Rahul</b>: his risk, the reasons, and the recommended advance.</span></li>
-      <li><span>Tap <b>Ask arrival time first</b>, play his reply, and watch the risk and advance drop.</span></li>
-      <li><span>Open <b>Meena</b>: high risk, so half the stay upfront. Change her rate from ₹4,000 to ₹5,000 and watch the advance update.</span></li>
-      <li><span>Approve <b>Meena's</b> advance, then play <b>"The advance is too much"</b>: it comes back to you to offer a smaller advance. Then handle <b>Deepak's</b> unpaid advance.</span></li>
-      <li><span>Simulate <b>Priya's</b> cancellation and refill the room from the waitlist.</span></li>
-      <li><span>Check <b>Farah</b> in or mark a no-show, then see <b>Impact</b>, learning and the activity log.</span></li>
-    </ol>
-    <p class="note">Prototype with sample data. Risk points come from a scorecard learned on 12,606 direct bookings in an open hotel dataset (Antonio, de Almeida and Nunes, 2019). Guest drop-off rates, resale chances and the "no reply" signal are assumptions to be learned from real outcomes. Payments and WhatsApp are simulated.</p>
-  </aside>
 
-  <main class="phone" aria-label="Room Guard app">
+  <main class="phone" aria-label="Slot Shield app">
     <header class="top">
       <div class="row"><div><h2 id="title">Welcome</h2><div class="sub">Hillview Stays · 20 rooms</div></div><span class="mode" id="mode">Review first</span></div>
-      <div class="agentline"><span aria-hidden="true" class="ms" style="font-size:16px">smart_toy</span>Room Guard agent, running on Razorpay</div>
+      <div class="agentline"><span aria-hidden="true" class="ms" style="font-size:16px">smart_toy</span>Slot Shield agent, running on Razorpay</div>
     </header>
     <div class="screen" id="screen" tabindex="-1"></div>
     <button class="fab" id="fab" type="button"><span aria-hidden="true" class="ms">mic</span>New booking</button>
@@ -300,7 +295,7 @@ const title=t=>$("title").textContent=t;
 function vWelcome(){
   title("Welcome");
   scr.innerHTML=`<div class="welcome"><div class="small" style="color:#fff;opacity:.85">Razorpay Agent Studio · Hospitality</div>
-    <h3>Room Guard is ready for Hillview Stays</h3>
+    <h3>Slot Shield is ready for Hillview Stays</h3>
     <div style="opacity:.92">It suggests the right advance for every direct booking, collects it with Razorpay payment links, and refills rooms when guests cancel. You approve everything.</div></div>
     <div class="card"><ul class="steps">
       <li><span aria-hidden="true" class="ms">check_circle</span><div><b>WhatsApp Business connected</b><div class="small">Guests get messages from your hotel number</div></div></li>
@@ -333,7 +328,7 @@ function vToday(){
   const arriving=B.filter(b=>b.status==="confirmed"&&b.checkIn.getTime()===today.getTime());
   const pend=B.filter(b=>b.status==="pending"||b.status==="asked");
   const rest=B.filter(b=>!overdue.includes(b)&&!arriving.includes(b)&&!pend.includes(b)&&!pushed.includes(b));
-  scr.innerHTML=`${!S.set.agentOn?`<div class="alert"><span aria-hidden="true" class="ms">power_settings_new</span><div><div class="t">Room Guard is off</div>Turn it on in Controls to get recommendations.</div></div>`:""}
+  scr.innerHTML=`${!S.set.agentOn?`<div class="alert"><span aria-hidden="true" class="ms">power_settings_new</span><div><div class="t">Slot Shield is off</div>Turn it on in Controls to get recommendations.</div></div>`:""}
     ${overdue.map(b=>`<div class="alert"><span aria-hidden="true" class="ms">error</span><div style="flex:1"><div class="t">${esc(first(b.name))} hasn't paid the ${rs(b.sentAmt)} advance</div>
       <div class="small">${b.status==="lastcall"?"Last call sent. Decide what to do.":"The payment link expired."}</div>
       <button class="btn h sm" data-release="${b.id}">Review and decide</button></div></div>`).join("")}
@@ -380,7 +375,7 @@ function vBooking(id){
     <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">psychology</span>Why this risk level</div><ul class="reasons">${reasons}</ul>
       <details style="margin-top:8px"><summary>How points work</summary><div class="small" style="margin-top:6px">Points come from a scorecard learned on 12,606 direct bookings. Every 20 points doubles the odds of a no-show or late cancellation. Signals marked "assumed" will be learned from real outcomes.</div></details></div>
     
-    <div class="reco"><div class="small" style="font-weight:700;color:var(--marigold-ink)">Room Guard recommends</div>
+    <div class="reco"><div class="small" style="font-weight:700;color:var(--marigold-ink)">Slot Shield recommends</div>
       <div class="amt">${a.best.amt?rs(a.best.amt):"No advance"}</div>
       <div class="terms">${esc(a.best.terms)}${a.best.amt?` Pay ${a.deadline}.`:""}</div>
       <div class="small" style="margin-top:6px">Max advance ${S.set.maxPct}% of stay (${rs(a.stay*S.set.maxPct/100)})</div></div>
@@ -456,7 +451,7 @@ function vCounter(id){
       <div class="bub me" style="margin-left:0;background:var(--card)">${rs(b.sentAmt)} advance is too much for us. Can you reduce it?</div></div>
     <div class="card" style="margin-top:12px"><div class="small">Booking</div><div style="font-weight:700">${fmtD(b.checkIn)} · ${b.nights} night${b.nights>1?"s":""} · ${b.rooms} room${b.rooms>1?"s":""} · stay ${rs(a.stay)}</div>
       <div class="small" style="margin-top:4px"><span class="pill p${a.tier}">${TN[a.tier]}</span> · ${Math.round(a.p*100)}% chance of a no-show or late cancellation</div></div>
-    ${sug?`<div class="reco"><div class="small" style="font-weight:700;color:var(--marigold-ink)">Room Guard suggests a smaller advance</div>
+    ${sug?`<div class="reco"><div class="small" style="font-weight:700;color:var(--marigold-ink)">Slot Shield suggests a smaller advance</div>
       <div class="amt">${rs(sug.amt)}</div><div class="terms">${esc(sug.terms)}</div>
       <div class="small" style="margin-top:6px">Keeps the booking while still protecting part of the stay. A refundable advance usually feels fair to guests.</div>
       <button class="btn m" data-lower="${b.id}" data-amt="${sug.amt}" data-terms="${esc(sug.terms)}"><span aria-hidden="true" class="ms">send</span>Send ${rs(sug.amt)} advance instead</button></div>`:""}
@@ -465,7 +460,7 @@ function vCounter(id){
       <div class="small" style="margin-top:4px">Custom amounts are refundable until ${fmtD(refundDate)}.</div></div>
     <button class="btn o" data-noadv="${b.id}"><span aria-hidden="true" class="ms">check</span>Confirm without an advance</button>
     <button class="btn o" data-letgo="${b.id}" style="color:var(--hibiscus)"><span aria-hidden="true" class="ms">person_off</span>Let the booking go</button>
-    <div class="note">Whatever you choose is recorded, so Room Guard learns how much guests at Hillview Stays are comfortable paying upfront.</div>`;
+    <div class="note">Whatever you choose is recorded, so Slot Shield learns how much guests at Hillview Stays are comfortable paying upfront.</div>`;
   $("csend").onclick=()=>{const v=Math.max(0,Math.round(+$("camt").value||0)); if(v>=b.sentAmt){toast(`Enter an amount below ${rs(b.sentAmt)}.`);return;}
     lowerAdvance(b,v,v?`Advance of ${rs(v)}, fully refundable until ${fmtD(refundDate)}.`:"");};
 }
@@ -483,7 +478,7 @@ function vRelease(id){
   scr.innerHTML=`<button class="back" data-back><span aria-hidden="true" class="ms">chevron_left</span>Today</button>
     <div class="alert"><span aria-hidden="true" class="ms">error</span><div><div class="t">${esc(b.name)} hasn't paid the ${rs(b.sentAmt)} advance</div>
       <div class="small">${fmtD(b.checkIn)} · ${b.nights} nights · ${b.rooms} room. The Razorpay link expired and a reminder went unanswered.</div></div></div>
-    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">route</span>What Room Guard has done</div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">route</span>What Slot Shield has done</div>
       <ul class="tl"><li class="done"><span aria-hidden="true" class="ms">check_circle</span>Sent the advance link with a ${S.set.deadlineHrs}-hour deadline</li>
       <li class="done"><span aria-hidden="true" class="ms">check_circle</span>Sent a reminder before the deadline</li>
       <li class="${b.status==="lastcall"?"done":"now"}"><span aria-hidden="true" class="ms">${b.status==="lastcall"?"check_circle":"radio_button_checked"}</span>Last call to the guest (${S.set.lastCallHrs} hours to reply)</li>
@@ -492,7 +487,7 @@ function vRelease(id){
       <div class="note">${wl?`<b>${wl} waitlisted guest${wl>1?"s":""}</b> want${wl>1?"":"s"} these dates and opted in to alerts.`:"No one on the waitlist wants these dates yet."} Releasing cancels the payment link so ${esc(first(b.name))} can't pay for a room that's gone.</div>
       <button class="btn h" data-dorelease="${b.id}"><span aria-hidden="true" class="ms">door_open</span>Release the room</button>
       <button class="btn o" data-moretime="${b.id}"><span aria-hidden="true" class="ms">more_time</span>Give 24 more hours</button>`}
-    <div class="note"><span aria-hidden="true" class="ms" style="font-size:16px;color:var(--leaf)">shield</span> Room Guard never cancels a booking that has been paid. It only releases holds where the advance wasn't paid.</div>`;
+    <div class="note"><span aria-hidden="true" class="ms" style="font-size:16px;color:var(--leaf)">shield</span> Slot Shield never cancels a booking that has been paid. It only releases holds where the advance wasn't paid.</div>`;
 }
 function vRefill(id){
   const b=S.bookings.find(x=>x.id===id);
@@ -506,7 +501,7 @@ function vRefill(id){
     ${el.map((w,i)=>`<div class="card"><div style="display:flex;gap:10px;align-items:center"><span class="av" style="background:${avColor(w.name)}">${initials(w.name)}</span>
       <div style="flex:1"><div style="font-weight:700">${esc(w.name)} ${i===0?'<span class="pill p0">Asked first</span>':""}</div><div class="small">Wanted ${fmtD(w.checkIn)} · asked ${fmtD(w.askedOn)}</div></div></div>
       ${w.booked?`<div class="state" style="color:var(--leaf);font-weight:700;margin-top:6px"><span aria-hidden="true" class="ms">check_circle</span> Booked, room refilled</div>`:w.offered?`<div class="small" style="margin-top:6px">Offer sent at your normal rate</div><button class="btn o sm" data-accept="${w.id}" data-for="${b.id}">Simulate: ${esc(first(w.name))} accepts</button>`:`<button class="btn m sm" data-offer="${w.id}"><span aria-hidden="true" class="ms">send</span>Offer room to ${esc(first(w.name))}</button>`}</div>`).join("")}
-    ${all.length>el.length?`<div class="small">${all.length-el.length} other guest${all.length-el.length===1?"":"s"} didn't opt in to alerts, so Room Guard won't message them.</div>`:""}
+    ${all.length>el.length?`<div class="small">${all.length-el.length} other guest${all.length-el.length===1?"":"s"} didn't opt in to alerts, so Slot Shield won't message them.</div>`:""}
     <button class="btn o" data-back><span aria-hidden="true" class="ms">today</span>Back to today</button>`;
 }
 function vNew(){
@@ -558,7 +553,7 @@ function drawForm(f){
 }
 function vWaitlist(){
   title("Waitlist");
-  scr.innerHTML=`<div class="note" style="margin-top:0">Guests you had to turn away. When a room frees up, Room Guard offers it to people who opted in, earliest request first, at your normal rate.</div>
+  scr.innerHTML=`<div class="note" style="margin-top:0">Guests you had to turn away. When a room frees up, Slot Shield offers it to people who opted in, earliest request first, at your normal rate.</div>
     ${S.waitlist.map(w=>`<div class="bk t0" style="border-left-color:${w.optIn?"var(--leaf)":"var(--line)"}"><span class="av" style="background:${avColor(w.name)}">${initials(w.name)}</span><span class="main">
       <span class="r1"><span class="name">${esc(w.name)}</span><span class="pill ${w.optIn?"p0":"pn"}">${w.optIn?"Opted in":"Not opted in"}</span></span>
       <span class="meta" style="display:block">Wants ${fmtD(w.checkIn)} · ${w.nights} night${w.nights>1?"s":""} · ${w.rooms} room</span>
@@ -572,7 +567,7 @@ function vImpact(){
       <div class="stat s2"><b>${I.refilled}</b><span>Rooms refilled (${rs(I.refillRev)})</span></div>
       <div class="stat s3"><b>${I.arrived}</b><span>Guests checked in</span></div>
       <div class="stat s4"><b>${I.saved||0}</b><span>Bookings kept after a smaller advance</span></div></div>
-    <div class="card" style="margin-top:12px"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">school</span>What Room Guard is learning</div>
+    <div class="card" style="margin-top:12px"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">school</span>What Slot Shield is learning</div>
       <div class="small" style="margin-bottom:6px">${I.outcomes} outcomes recorded at Hillview Stays</div>
       <ul class="reasons"><li><span>Predicted vs actual late-cancel and no-show rate (last 30 bookings, sample)</span><span>7% vs 6%</span></li>
       <li><span>Guests who walked away when asked for one night refundable (sample)</span><span>1 of 12</span></li>
@@ -582,7 +577,7 @@ function vImpact(){
       ${over>=2?`<div class="note"><span aria-hidden="true" class="ms" style="color:var(--indigo)">lightbulb</span> You lowered ${over} recommended advances. Make smaller advances your default for medium-risk guests? <button class="link" data-softer>Yes, adjust</button></div>`:""}
     </div>
     <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">science</span>How impact is proven</div>
-      <div class="small">In a live pilot, 1 in 10 direct bookings follows your usual rule instead of Room Guard. Comparing realised revenue per direct booking, no-shows and guest drop-offs between the two groups shows what Room Guard really added.</div></div>
+      <div class="small">In a live pilot, 1 in 10 direct bookings follows your usual rule instead of Slot Shield. Comparing realised revenue per direct booking, no-shows and guest drop-offs between the two groups shows what Slot Shield really added.</div></div>
     <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">history</span>Activity log</div>
       <ul class="log">${S.log.slice(0,12).map(l=>`<li><span aria-hidden="true" class="ms">${l.icon}</span><span style="flex:1">${esc(l.t)}</span><span class="small">${l.when}</span></li>`).join("")}</ul></div>`;
 }
@@ -590,7 +585,7 @@ function vControls(){
   title("Controls");
   const s=S.set;
   scr.innerHTML=`<div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">smart_toy</span>Agent</div>
-    <label class="check"><input type="checkbox" id="c_on" ${s.agentOn?"checked":""}> Room Guard is on</label>
+    <label class="check"><input type="checkbox" id="c_on" ${s.agentOn?"checked":""}> Slot Shield is on</label>
     <label class="check"><input type="checkbox" id="c_rev" ${s.review?"checked":""}> Review every advance before it's sent</label>
     <div class="small">When review is off, these can run on their own:</div>
     <label class="check"><input type="checkbox" id="c_ar" ${s.autoReminders?"checked":""}> Payment reminders and 48-hour arrival checks</label>
@@ -605,7 +600,7 @@ function vControls(){
     <label class="check"><input type="checkbox" id="c_pk" ${s.peakDates?"checked":""}> Treat upcoming dates as high demand (festival season)</label></div>
     <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">verified_user</span>Trusted guests (never asked for an advance)</div>
     ${S.trusted.map(p=>{const b=S.bookings.find(x=>x.phone===p);return `<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:4px 0"><span>${esc(b?b.name:p)}</span><button class="link" data-untrust="${esc(p)}">Remove</button></div>`;}).join("")||'<div class="small">No trusted guests yet.</div>'}</div>
-    <div class="note"><span aria-hidden="true" class="ms" style="font-size:16px;color:var(--leaf)">shield</span> Always on: Room Guard never blocks a booking, never cancels a paid booking, never exceeds your maximum advance, and only messages waitlisted guests who opted in.</div>`;
+    <div class="note"><span aria-hidden="true" class="ms" style="font-size:16px;color:var(--leaf)">shield</span> Always on: Slot Shield never blocks a booking, never cancels a paid booking, never exceeds your maximum advance, and only messages waitlisted guests who opted in.</div>`;
   const bind=(id,fn)=>$(id).onchange=e=>{fn(e.target);go("controls");};
   bind("c_on",t=>s.agentOn=t.checked); bind("c_rev",t=>s.review=t.checked); bind("c_ar",t=>s.autoReminders=t.checked); bind("c_al",t=>s.autoLowRisk=t.checked); bind("c_arl",t=>s.autoRelease=t.checked);
   bind("c_rd",t=>s.refundDays=+t.value); bind("c_dl",t=>s.deadlineHrs=+t.value); bind("c_lc",t=>s.lastCallHrs=+t.value); bind("c_co",t=>s.cutoff=t.value); bind("c_pk",t=>s.peakDates=t.checked);
