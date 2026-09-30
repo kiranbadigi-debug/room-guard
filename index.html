@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Room Guard for Hillview Stays (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#13262B; --ink-2:#44585E; --ink-3:#72868C;
+  --paper:#EEF4F5; --card:#FFFFFF; --line:#D6E2E4;
+  --peacock:#0B6E79; --peacock-deep:#07525B; --peacock-soft:#DDF0F1;
+  --marigold:#F4A20C; --marigold-ink:#7A4F00; --marigold-soft:#FFF1D6;
+  --hibiscus:#C92A63; --hibiscus-soft:#FBE3EC;
+  --leaf:#23864A; --leaf-soft:#DDF3E5;
+  --indigo:#4146B5; --indigo-soft:#E6E7FA;
+  --wa-bg:#E9F4EE; --wa-me:#D2F1DC;
+  --on-dark:#FFFFFF; --focus:#1F6FEB;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:Figtree,"Segoe UI",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.45}
+h1,h2,h3{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif;margin:0;letter-spacing:-0.01em}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.ms{font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;font-size:20px;line-height:1;display:inline-block;vertical-align:middle;font-variation-settings:"FILL" 1;-webkit-font-feature-settings:"liga";font-feature-settings:"liga"}
+.layout{display:flex;gap:36px;justify-content:center;align-items:flex-start;padding:24px 16px;max-width:1120px;margin:0 auto}
+.guide{max-width:350px;flex:1;position:sticky;top:24px}
+.guide .brand{display:inline-flex;align-items:center;gap:8px;background:var(--peacock-soft);color:var(--peacock-deep);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+.guide h1{font-size:40px;line-height:1.02;font-weight:800;margin-bottom:10px;color:var(--peacock-deep)}
+.guide p{color:var(--ink-2);margin:0 0 14px}
+.guide ol{padding-left:0;margin:0 0 16px;list-style:none;counter-reset:s}
+.guide li{counter-increment:s;display:flex;gap:10px;margin-bottom:10px;color:var(--ink-2)}
+.guide li::before{content:counter(s);flex:0 0 24px;height:24px;border-radius:50%;background:var(--marigold);color:#3A2600;font-weight:700;font-size:13px;display:grid;place-items:center}
+.guide .note{font-size:13px;color:var(--ink-3);border-left:3px solid var(--hibiscus);padding-left:10px}
+.phone{position:relative;width:400px;max-width:100%;height:800px;max-height:calc(100vh - 48px);background:var(--paper);border:1px solid var(--line);border-radius:32px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(7,82,91,.18)}
+@media (max-width:840px){
+  .layout{padding:0;gap:0}
+  .guide{display:none}
+  .phone{width:100%;height:100%;min-height:100vh;min-height:100dvh;max-height:none;border-radius:0;border:0;box-shadow:none}
+  html,body{height:100%}
+}
+.top{background:var(--peacock);color:var(--on-dark);padding:16px 18px 14px}
+.top .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.top h2{font-size:23px;font-weight:700}
+.top .sub{font-size:13px;opacity:.85;margin-top:2px}
+.mode{background:var(--marigold);color:#3A2600;font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.agentline{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.9;margin-top:8px}
+.screen{flex:1;overflow-y:auto;padding:14px 16px 96px}
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--card)}
+.tabs button{flex:1;background:none;border:0;padding:8px 4px 10px;color:var(--ink-3);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabs button .ms{font-variation-settings:"FILL" 0}
+.tabs button[aria-current="page"]{color:var(--peacock);font-weight:700}
+.tabs button[aria-current="page"] .ms{font-variation-settings:"FILL" 1}
+.fab{position:absolute;right:16px;bottom:74px;background:var(--hibiscus);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 8px 20px rgba(201,42,99,.35)}
+.sec{font-size:13px;font-weight:600;color:var(--ink-2);margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.bk{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.bk.t0{border-left-color:var(--leaf)} .bk.t1{border-left-color:var(--marigold)} .bk.t2{border-left-color:var(--hibiscus)}
+.av{flex:0 0 40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px}
+.bk .main{flex:1;min-width:0}
+.bk .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bk .name{font-weight:700}
+.bk .meta{color:var(--ink-2);font-size:13px;margin-top:1px}
+.bk .state{font-size:12px;color:var(--ink-3);margin-top:5px;display:flex;align-items:center;gap:4px}
+.pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.p0{background:var(--leaf-soft);color:var(--leaf)} .p1{background:var(--marigold-soft);color:var(--marigold-ink)} .p2{background:var(--hibiscus-soft);color:var(--hibiscus)}
+.pn{background:var(--peacock-soft);color:var(--peacock-deep)}
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:16px;padding:12px 14px;margin-bottom:10px;background:var(--hibiscus-soft);border:1px solid color-mix(in srgb,var(--hibiscus) 35%,transparent)}
+.alert.info{background:var(--indigo-soft);border-color:color-mix(in srgb,var(--indigo) 35%,transparent)}
+.alert .ms{color:var(--hibiscus)} .alert.info .ms{color:var(--indigo)}
+.alert .t{font-weight:700}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;border-radius:12px;padding:12px;font-weight:700;background:var(--peacock);color:#fff;margin-top:8px}
+.btn.m{background:var(--marigold);color:#3A2600}
+.btn.h{background:var(--hibiscus);color:#fff}
+.btn.o{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:9px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.link{background:none;border:0;color:var(--peacock);text-decoration:underline;padding:8px 0;font-weight:600}
+.back{background:none;border:0;color:var(--peacock);padding:0 0 10px;font-weight:600;display:flex;align-items:center;gap:2px}
+label{display:block;font-size:13px;color:var(--ink-2);margin:10px 0 4px;font-weight:500}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+textarea{min-height:90px;resize:vertical}
+.check{display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-size:14px;color:var(--ink)}
+.check input{width:auto;margin-top:3px;accent-color:var(--peacock)}
+input[type=range]{accent-color:var(--hibiscus);padding:0;border:0;background:none}
+.risk{display:flex;align-items:center;gap:14px;margin:4px 0 6px}
+.ring{--v:0;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--v)*1%),var(--line) 0)}
+.ring span{width:66px;height:66px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px}
+.reasons{list-style:none;padding:0;margin:0}
+.reasons li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.reasons li:first-child{border-top:0}
+.up{color:var(--hibiscus);font-weight:700} .down{color:var(--leaf);font-weight:700}
+.opt{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:9px 10px;border-radius:12px;border:1px solid var(--line);margin-bottom:6px;background:var(--card)}
+.opt.best{border:2px solid var(--marigold);background:var(--marigold-soft)}
+.opt .lbl{font-size:14px;font-weight:600}
+.opt .loss{font-size:13px;font-weight:700;white-space:nowrap}
+.bar{grid-column:1/-1;height:7px;border-radius:4px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .ns{background:var(--hibiscus)} .bar .dr{background:var(--indigo)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);margin:4px 0 8px}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.reco{background:linear-gradient(135deg,var(--marigold-soft),var(--card));border:2px solid var(--marigold);border-radius:18px;padding:14px;margin-top:10px}
+.reco .amt{font-family:"Bricolage Grotesque",sans-serif;font-size:30px;font-weight:800;color:var(--marigold-ink)}
+.reco .terms{color:var(--ink-2);font-size:14px}
+.note{font-size:13px;color:var(--ink-2);background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-top:10px}
+.small{font-size:12px;color:var(--ink-3)}
+.tl{list-style:none;padding:0;margin:0}
+.tl li{display:flex;gap:10px;align-items:flex-start;padding:4px 0;font-size:14px;color:var(--ink-3)}
+.tl li .ms{font-size:18px;color:var(--line)}
+.tl li.done{color:var(--ink)} .tl li.done .ms{color:var(--leaf)}
+.tl li.now{color:var(--ink);font-weight:700} .tl li.now .ms{color:var(--marigold)}
+.wa{background:var(--wa-bg);border-radius:18px;padding:12px}
+.wa .hd{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
+.bub{background:var(--card);border-radius:12px;padding:9px 11px;margin-bottom:8px;max-width:88%;font-size:14px}
+.bub.me{background:var(--wa-me);margin-left:auto}
+.bub .pay{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:8px;background:var(--peacock);color:#fff;border-radius:10px;padding:9px;font-weight:700;border:0;width:100%}
+.sim{border:2px dashed color-mix(in srgb,var(--indigo) 45%,transparent);border-radius:16px;padding:10px 12px;margin-top:12px;background:var(--indigo-soft)}
+.sim .small{color:var(--indigo);font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:4px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{border-radius:16px;padding:12px;color:#fff}
+.stat b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:24px;font-weight:800}
+.stat span{font-size:12px;opacity:.95}
+.s1{background:var(--peacock)} .s2{background:var(--leaf)} .s3{background:var(--indigo)} .s4{background:var(--marigold);color:#3A2600}
+.log{list-style:none;padding:0;margin:0}
+.log li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.log li:first-child{border-top:0}
+.log .ms{font-size:18px;color:var(--peacock)}
+.paysheet{border-radius:18px;border:1px solid var(--line);background:var(--card);padding:14px;margin-top:10px}
+.upi{display:flex;gap:8px;margin-top:8px}
+.upi button{flex:1;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 4px;font-size:12px;font-weight:600}
+.upi button[aria-pressed="true"]{border-color:var(--peacock);background:var(--peacock-soft)}
+.toast{position:absolute;left:16px;right:16px;bottom:78px;background:var(--ink);color:var(--card);border-radius:12px;padding:11px 14px;font-size:14px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;z-index:5}
+.toast.show{opacity:1;transform:none}
+.welcome{background:var(--peacock);color:#fff;border-radius:20px;padding:18px;margin-bottom:12px}
+.welcome h3{font-size:24px;font-weight:800;margin:6px 0}
+.steps{list-style:none;padding:0;margin:0}
+.steps li{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps .ms{color:var(--leaf)}
+details summary{cursor:pointer;font-weight:600;color:var(--peacock)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="guide" aria-label="Demo guide">
+    <div class="brand"><span aria-hidden="true" class="ms">smart_toy</span>Razorpay Agent Studio · Hospitality</div>
+    <h1>Room Guard</h1>
+    <p>An AI agent that helps small hotels decide how much advance to take on direct bookings, collects it through Razorpay payment links, and refills rooms when guests cancel.</p>
+    <ol>
+      <li><span>Start on the setup screen, then open <b>Rahul</b>: his risk, the reasons, and the recommended advance.</span></li>
+      <li><span>Tap <b>Ask arrival time first</b>, play his reply, and watch the risk and advance drop.</span></li>
+      <li><span>Open <b>Meena</b>: high risk, so half the stay upfront. Change her rate from ₹4,000 to ₹5,000 and watch the advance update.</span></li>
+      <li><span>Send Rahul's link, then play <b>"The advance is too much"</b>: it comes back to you to offer a smaller advance. Then handle <b>Deepak's</b> unpaid advance.</span></li>
+      <li><span>Simulate <b>Priya's</b> cancellation and refill the room from the waitlist.</span></li>
+      <li><span>Check <b>Farah</b> in or mark a no-show, then see <b>Impact</b>, learning and the activity log.</span></li>
+    </ol>
+    <p class="note">Prototype with sample data. Risk points come from a scorecard learned on 12,606 direct bookings in an open hotel dataset (Antonio, de Almeida and Nunes, 2019). Guest drop-off rates, resale chances and the "no reply" signal are assumptions to be learned from real outcomes. Payments and WhatsApp are simulated.</p>
+  </aside>
+
+  <main class="phone" aria-label="Room Guard app">
+    <header class="top">
+      <div class="row"><div><h2 id="title">Welcome</h2><div class="sub">Hillview Stays · 20 rooms</div></div><span class="mode" id="mode">Review first</span></div>
+      <div class="agentline"><span aria-hidden="true" class="ms" style="font-size:16px">smart_toy</span>Room Guard agent, running on Razorpay</div>
+    </header>
+    <div class="screen" id="screen" tabindex="-1"></div>
+    <button class="fab" id="fab" type="button"><span aria-hidden="true" class="ms">mic</span>New booking</button>
+    <nav class="tabs" aria-label="Sections">
+      <button type="button" data-tab="today"><span aria-hidden="true" class="ms">today</span>Today</button>
+      <button type="button" data-tab="waitlist"><span aria-hidden="true" class="ms">hourglass_top</span>Waitlist</button>
+      <button type="button" data-tab="impact"><span aria-hidden="true" class="ms">insights</span>Impact</button>
+      <button type="button" data-tab="controls"><span aria-hidden="true" class="ms">tune</span>Controls</button>
+    </nav>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+</div>
+
+<script>
+/* ===== Scorecard: learned on direct bookings (PDO 20) ===== */
+const INTERCEPT=-2.142, FACTOR=20/Math.log(2);
+const POINTS={
+  lead_8_30:{pts:6,label:"Booked 8 to 30 days ahead"},
+  lead_31_90:{pts:1,label:"Booked 31 to 90 days ahead"},
+  lead_90p:{pts:-17,label:"Booked more than 90 days ahead"},
+  repeat:{pts:-14,label:"Has stayed with us before"},
+  prev_cancel:{pts:61,label:"Cancelled late or didn't show before"},
+  shared:{pts:-24,label:"Shared arrival time or a request"},
+  long_stay:{pts:-7,label:"Staying 4 nights or more"},
+  no_reply:{pts:20,label:"No reply to confirmation in 24 hours",assumed:true}
+};
+/* ===== Assumptions (to be learned from real outcomes) ===== */
+const DROP={none:0, ref1:0.06, non1:0.12, half:0.20}; // chance a genuine guest walks away when asked
+const RESALE={normal:0.25, peak:0.70};                 // chance a walked-away guest's room is resold
+
+/* ===== Helpers ===== */
+const DAY=86400000, today=new Date(); today.setHours(0,0,0,0);
+const addDays=n=>new Date(today.getTime()+n*DAY);
+const fmtD=d=>d.toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+const rs=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const dBetween=(a,b)=>Math.round((b-a)/DAY);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const first=n=>n.split(" ")[0];
+const COLORS=["var(--peacock)","var(--indigo)","var(--hibiscus)","var(--leaf)","var(--marigold-ink)"];
+const avColor=n=>COLORS[[...n].reduce((s,c)=>s+c.charCodeAt(0),0)%COLORS.length];
+const initials=n=>n.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+const nowTime=()=>new Date().toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"});
+
+/* ===== State ===== */
+const S={
+  tab:"welcome", view:null,
+  set:{review:true,agentOn:true,maxPct:50,refundDays:7,deadlineHrs:48,lastCallHrs:2,cutoff:"11:59 pm",peakDates:false,autoReminders:true,autoLowRisk:false,autoRelease:false},
+  trusted:["98450 11223"],
+  bookings:[
+    {id:1,name:"Rahul Sharma",phone:"98765 43210",checkIn:addDays(16),nights:2,rooms:2,rate:3200,repeat:false,prevCancel:false,shared:false,noReply:false,peak:false,status:"pending",bookedOn:today},
+    {id:2,name:"Meena Kulkarni",phone:"99887 76655",checkIn:addDays(40),nights:3,rooms:1,rate:4000,repeat:false,prevCancel:true,shared:false,noReply:false,peak:false,status:"pending",bookedOn:today},
+    {id:5,name:"Deepak Verma",phone:"93333 44556",checkIn:addDays(6),nights:2,rooms:1,rate:3000,repeat:false,prevCancel:false,shared:false,noReply:true,peak:false,status:"overdue",bookedOn:addDays(-3),sentAmt:3000},
+    {id:3,name:"Arjun Pillai",phone:"98450 11223",checkIn:addDays(1),nights:1,rooms:1,rate:2600,repeat:true,prevCancel:false,shared:true,noReply:false,peak:false,status:"confirmed",bookedOn:addDays(-3),paid:0},
+    {id:4,name:"Priya Menon",phone:"90000 12345",checkIn:addDays(2),nights:1,rooms:1,rate:3000,repeat:false,prevCancel:false,shared:false,noReply:false,peak:false,status:"confirmed",bookedOn:addDays(-20),paid:3000,refundUntil:addDays(-5)},
+    {id:6,name:"Farah Khan",phone:"91234 56789",checkIn:today,nights:2,rooms:1,rate:2900,repeat:false,prevCancel:false,shared:true,noReply:false,peak:false,status:"confirmed",bookedOn:addDays(-12),paid:2900,refundUntil:addDays(-5)}
+  ],
+  waitlist:[
+    {id:101,name:"Anil Rao",phone:"97000 22110",checkIn:addDays(2),nights:1,rooms:1,askedOn:addDays(-6),optIn:true},
+    {id:102,name:"Sana Mirza",phone:"96111 45678",checkIn:addDays(2),nights:1,rooms:1,askedOn:addDays(-4),optIn:true},
+    {id:103,name:"Vikram Das",phone:"95555 90909",checkIn:addDays(2),nights:2,rooms:1,askedOn:addDays(-2),optIn:false},
+    {id:104,name:"Kavitha Iyer",phone:"94444 12121",checkIn:addDays(6),nights:2,rooms:1,askedOn:addDays(-1),optIn:true}
+  ],
+  imp:{collected:5900,links:2,refilled:0,refillRev:0,dropped:0,arrived:0,noshows:0,released:0,outcomes:38},
+  edits:[],
+  log:[
+    {icon:"payments",t:"Priya paid "+rs(3000)+" advance",when:fmtD(addDays(-19))},
+    {icon:"send",t:"Advance link sent to Deepak ("+rs(3000)+", refundable)",when:fmtD(addDays(-3))},
+    {icon:"verified_user",t:"Arjun confirmed with no advance (trusted guest)",when:fmtD(addDays(-3))}
+  ],
+  nextId:7
+};
+const logIt=(icon,t)=>S.log.unshift({icon,t,when:"Today "+nowTime()});
+
+/* ===== Risk and decision ===== */
+function signals(b){
+  const lead=dBetween(b.bookedOn,b.checkIn), on=[];
+  if(lead>=8&&lead<=30)on.push("lead_8_30"); else if(lead>=31&&lead<=90)on.push("lead_31_90"); else if(lead>90)on.push("lead_90p");
+  if(b.repeat)on.push("repeat"); if(b.prevCancel)on.push("prev_cancel"); if(b.shared)on.push("shared");
+  if(b.nights>=4)on.push("long_stay"); if(b.noReply)on.push("no_reply");
+  return {lead,on};
+}
+function assess(b){
+  const {lead,on}=signals(b);
+  const pts=on.reduce((s,k)=>s+POINTS[k].pts,0);
+  const p=1/(1+Math.exp(-(INTERCEPT+pts/FACTOR)));
+  const tier=p<0.06?0:p<0.14?1:2;
+  const trusted=S.trusted.includes(b.phone), peak=b.peak||S.set.peakDates;
+  const nightly=b.rate*b.rooms, stay=nightly*b.nights, cap=stay*S.set.maxPct/100;
+  const refundDate=new Date(Math.max(b.checkIn.getTime()-S.set.refundDays*DAY, today.getTime()+DAY));
+  const resale=peak?RESALE.peak:RESALE.normal;
+  let opts=[
+    {key:"none",label:"No advance",terms:"Free cancellation up to 2 days before arrival.",amt:0},
+    {key:"ref1",label:"One night, refundable",terms:`One night's advance, fully refundable until ${fmtD(refundDate)}.`,amt:nightly},
+    {key:"non1",label:"One night, non-refundable",terms:"One night's advance, non-refundable. Balance at the hotel.",amt:nightly},
+    {key:"half",label:"Half the stay, non-refundable",terms:"50% of the stay upfront, non-refundable. Balance at the hotel.",amt:stay*0.5}
+  ].filter(o=>o.key!=="half"||o.amt>nightly+1).filter(o=>o.amt<=cap+0.5);
+  opts.forEach(o=>{ o.ns=p*(stay-o.amt); o.dr=DROP[o.key]*stay*(1-p)*(1-resale); o.loss=o.ns+o.dr; });
+  let best=opts.reduce((a,o)=>o.loss<a.loss?o:a,opts[0]);
+  if(trusted) best=opts[0];
+  const maxLoss=Math.max(...opts.map(o=>o.loss),1);
+  const deadline=lead<=3?"within 6 hours":"by "+fmtD(new Date(today.getTime()+S.set.deadlineHrs*3600000));
+  return {p,tier,trusted,peak,lead,on,pts,opts,best,maxLoss,nightly,stay,resale,deadline};
+}
+const TN=["Low risk","Medium risk","High risk"];
+
+/* ===== Optional AI via artifact runtime ===== */
+let sp=null;
+const getSample=()=>sp||(sp=(window.claude&&typeof window.claude.use==="function")?window.claude.use("sample").catch(()=>null):Promise.resolve(null));
+
+/* ===== Shell ===== */
+const $=id=>document.getElementById(id), scr=$("screen");
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2800);}
+function go(tab,view){
+  S.tab=tab;S.view=view||null;
+  document.querySelectorAll(".tabs button").forEach(b=>b.dataset.tab===tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  $("fab").style.display=(tab==="today"&&!view)?"flex":"none";
+  $("mode").textContent=!S.set.agentOn?"Agent off":S.set.review?"Review first":"Automatic";
+  render(); scr.scrollTop=0; scr.focus({preventScroll:true});
+}
+function render(){
+  const v=S.view;
+  if(v){ return ({counter:vCounter,booking:vBooking,guest:vGuest,newb:vNew,refill:vRefill,release:vRelease})[v.type](v.id); }
+  ({welcome:vWelcome,today:vToday,waitlist:vWaitlist,impact:vImpact,controls:vControls})[S.tab]();
+}
+const title=t=>$("title").textContent=t;
+
+/* ===== Screens ===== */
+function vWelcome(){
+  title("Welcome");
+  scr.innerHTML=`<div class="welcome"><div class="small" style="color:#fff;opacity:.85">Razorpay Agent Studio · Hospitality</div>
+    <h3>Room Guard is ready for Hillview Stays</h3>
+    <div style="opacity:.92">It suggests the right advance for every direct booking, collects it with Razorpay payment links, and refills rooms when guests cancel. You approve everything.</div></div>
+    <div class="card"><ul class="steps">
+      <li><span aria-hidden="true" class="ms">check_circle</span><div><b>WhatsApp Business connected</b><div class="small">Guests get messages from your hotel number</div></div></li>
+      <li><span aria-hidden="true" class="ms">check_circle</span><div><b>Razorpay payment links on</b><div class="small">Partial payments, expiry and automatic status updates</div></div></li>
+      <li><span aria-hidden="true" class="ms">check_circle</span><div><b>Your policy set</b><div class="small">Max advance ${S.set.maxPct}% · refundable until ${S.set.refundDays} days before · no-show cut-off ${S.set.cutoff}</div></div></li>
+      <li><span aria-hidden="true" class="ms">check_circle</span><div><b>38 past bookings imported</b><div class="small">Used to tune risk scores for your hotel</div></div></li>
+    </ul></div>
+    <button class="btn m" data-goto="today"><span aria-hidden="true" class="ms">today</span>Open today's bookings</button>
+    <button class="btn o" data-goto="controls">Change policy first</button>`;
+}
+function statusLine(b){
+  return {pending:["pending_actions","Waiting for your approval"],asked:["chat","Arrival-time question sent"],sent:["schedule","Advance link sent "+(b.sentAmt?rs(b.sentAmt):"")+", waiting"],
+    overdue:["error","Advance not paid, deadline passed"],lastcall:["campaign","Last call sent, "+S.set.lastCallHrs+" hours left"],
+    confirmed:["check_circle",b.paid?`Confirmed, ${rs(b.paid)} advance paid`:"Confirmed, no advance needed"],
+    released:["door_open","Room released"],cancelled:["cancel","Cancelled by guest"],dropped:["person_off","Booking let go after the guest declined"],pushback:["forum","Guest says the advance is too much"],
+    arrived:["hotel","Checked in"],noshow:["no_accounts","No-show, advance kept per terms"]}[b.status]||["info",""];
+}
+function bkCard(b){
+  const a=assess(b), [ic,txt]=statusLine(b);
+  return `<button class="bk t${a.tier}" data-open="${b.id}"><span class="av" style="background:${avColor(b.name)}">${initials(b.name)}</span>
+    <span class="main"><span class="r1"><span class="name">${esc(b.name)}</span><span class="pill p${a.tier}">${TN[a.tier]}</span></span>
+    <span class="meta" style="display:block">${fmtD(b.checkIn)} · ${b.nights} night${b.nights>1?"s":""} · ${b.rooms} room${b.rooms>1?"s":""}</span>
+    <span class="state"><span aria-hidden="true" class="ms" style="font-size:15px">${ic}</span>${txt}</span></span></button>`;
+}
+function vToday(){
+  title("Today");
+  const B=S.bookings;
+  const overdue=B.filter(b=>b.status==="overdue"||b.status==="lastcall");
+  const pushed=B.filter(b=>b.status==="pushback");
+  const arriving=B.filter(b=>b.status==="confirmed"&&b.checkIn.getTime()===today.getTime());
+  const pend=B.filter(b=>b.status==="pending"||b.status==="asked");
+  const rest=B.filter(b=>!overdue.includes(b)&&!arriving.includes(b)&&!pend.includes(b)&&!pushed.includes(b));
+  scr.innerHTML=`${!S.set.agentOn?`<div class="alert"><span aria-hidden="true" class="ms">power_settings_new</span><div><div class="t">Room Guard is off</div>Turn it on in Controls to get recommendations.</div></div>`:""}
+    ${overdue.map(b=>`<div class="alert"><span aria-hidden="true" class="ms">error</span><div style="flex:1"><div class="t">${esc(first(b.name))} hasn't paid the ${rs(b.sentAmt)} advance</div>
+      <div class="small">${b.status==="lastcall"?"Last call sent. Decide what to do.":"The payment link expired."}</div>
+      <button class="btn h sm" data-release="${b.id}">Review and decide</button></div></div>`).join("")}
+    ${pushed.map(b=>`<div class="alert" style="background:var(--marigold-soft);border-color:var(--marigold)"><span aria-hidden="true" class="ms" style="color:var(--marigold-ink)">forum</span><div style="flex:1"><div class="t">${esc(first(b.name))} says the ${rs(b.sentAmt)} advance is too much</div>
+      <div class="small">The booking is on hold, not lost. Choose a smaller advance or let it go.</div>
+      <button class="btn m sm" data-counter="${b.id}">Review options</button></div></div>`).join("")}
+    ${arriving.map(b=>`<div class="alert info"><span aria-hidden="true" class="ms">hotel</span><div style="flex:1"><div class="t">${esc(b.name)} arrives today</div>
+      <div class="small">Not checked in yet. No-show cut-off: ${S.set.cutoff}.</div>
+      <div class="two"><button class="btn sm" data-arrive="${b.id}">Mark checked in</button><button class="btn o sm" data-noshow="${b.id}">Past cut-off: no-show</button></div></div></div>`).join("")}
+    <div class="sec"><span aria-hidden="true" class="ms" style="font-size:18px">pending_actions</span>${pend.length?`${pend.length} booking${pend.length>1?"s":""} need${pend.length>1?"":"s"} your approval`:"Nothing waiting for approval"}</div>
+    ${pend.map(bkCard).join("")}
+    <div class="sec"><span aria-hidden="true" class="ms" style="font-size:18px">event_upcoming</span>Upcoming and recent</div>
+    ${rest.map(bkCard).join("")}`;
+}
+function timeline(b){
+  const st=b.status;
+  const steps=[["Booked","edit_calendar",true],
+    ["Advance requested","send",["sent","overdue","lastcall","confirmed","arrived","noshow","released","dropped"].includes(st)&&(b.sentAmt||b.paid)],
+    ["Confirmed","verified",["confirmed","arrived","noshow"].includes(st)],
+    ["48-hour arrival check","notifications_active",["arrived","noshow"].includes(st)||(st==="confirmed"&&dBetween(today,b.checkIn)<=2)],
+    ["Arrived","hotel",st==="arrived"]];
+  let nowSet=false;
+  return `<ul class="tl">${steps.map(([l,ic,d])=>{let c=d?"done":"";if(!d&&!nowSet&&!["released","cancelled","dropped","noshow"].includes(st)){c="now";nowSet=true;}
+    return `<li class="${c}"><span aria-hidden="true" class="ms">${d?"check_circle":c==="now"?"radio_button_checked":"radio_button_unchecked"}</span>${l}</li>`;}).join("")}
+    ${["released","cancelled","dropped","noshow"].includes(st)?`<li class="now"><span aria-hidden="true" class="ms" style="color:var(--hibiscus)">block</span>${statusLine(b)[1]}</li>`:""}</ul>`;
+}
+function vBooking(id){
+  const b=S.bookings.find(x=>x.id===id), a=assess(b);
+  title(first(b.name)+"'s booking");
+  const col=["var(--leaf)","var(--marigold)","var(--hibiscus)"][a.tier];
+  const reasons=a.on.map(k=>{const P=POINTS[k];return `<li><span>${P.label}${P.assumed?' <span class="small">(assumed)</span>':""}</span><span class="${P.pts>0?"up":"down"}">${P.pts>0?"+":""}${P.pts}</span></li>`;}).join("")||`<li><span>Booked within a week, no history yet</span><span class="small">starting point</span></li>`;
+  const open=["pending","asked"].includes(b.status)&&S.set.agentOn;
+  const opts=a.opts.map(o=>`<div class="opt ${o===a.best?"best":""}"><span class="lbl">${o===a.best?'<span aria-hidden="true" class="ms" style="font-size:16px;color:var(--marigold-ink)">star</span> ':""}${o.label}${o.amt?` · ${rs(o.amt)}`:""}</span>
+    <span class="loss">${rs(o.loss)}</span><span class="bar" aria-hidden="true"><i class="ns" style="width:${o.ns/a.maxLoss*100}%"></i><i class="dr" style="width:${o.dr/a.maxLoss*100}%"></i></span></div>`).join("");
+  scr.innerHTML=`<button class="back" data-back><span aria-hidden="true" class="ms">chevron_left</span>Today</button>
+    <div class="card">
+      <div class="r1" style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700;font-size:17px">${esc(b.name)}</div>
+      <div class="small">${fmtD(b.checkIn)} · ${b.nights} night${b.nights>1?"s":""} · ${b.rooms} room${b.rooms>1?"s":""} at ${rs(b.rate)} · stay ${rs(a.stay)}</div></div>
+      <span class="av" style="background:${avColor(b.name)}">${initials(b.name)}</span></div>
+      <div class="risk"><div class="ring" style="--v:${Math.min(100,Math.round(a.p*100*2))};--c:${col}"><span>${Math.round(a.p*100)}%</span></div>
+      <div><span class="pill p${a.tier}">${TN[a.tier]}</span><div class="small" style="margin-top:6px">Chance of a no-show or late cancellation, based on ${a.on.length||"no"} signal${a.on.length===1?"":"s"}</div></div></div>
+      ${a.trusted?`<div class="note"><span aria-hidden="true" class="ms" style="color:var(--leaf)">verified_user</span> On your trusted guests list, so no advance is suggested.</div>`:""}
+    </div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">psychology</span>Why this risk level</div><ul class="reasons">${reasons}</ul>
+      <details style="margin-top:8px"><summary>How points work</summary><div class="small" style="margin-top:6px">Points come from a scorecard learned on 12,606 direct bookings. Every 20 points doubles the odds of a no-show or late cancellation. Signals marked "assumed" will be learned from real outcomes.</div></details></div>
+    
+    <div class="reco"><div class="small" style="font-weight:700;color:var(--marigold-ink)">Room Guard recommends</div>
+      <div class="amt">${a.best.amt?rs(a.best.amt):"No advance"}</div>
+      <div class="terms">${esc(a.best.terms)}${a.best.amt?` Pay ${a.deadline}.`:""}</div>
+      <div class="small" style="margin-top:6px">Max advance ${S.set.maxPct}% of stay (${rs(a.stay*S.set.maxPct/100)})</div></div>
+    ${open?`<div class="card" style="margin-top:12px"><label for="rate" style="margin-top:0">Room rate per night</label>
+      <div style="display:flex;gap:8px"><input id="rate" type="number" min="0" step="100" value="${b.rate}"><button class="btn o sm" id="rateBtn" style="margin-top:0;width:auto;padding:9px 14px">Update</button></div>
+      <div class="small" style="margin-top:4px">Changing the rate recalculates the advance. The risk level stays the same.</div></div>
+      <label for="amt">Change the advance amount if you want</label><input id="amt" type="number" min="0" step="100" value="${Math.round(a.best.amt)}">
+      <label class="check"><input type="checkbox" id="peak" ${b.peak?"checked":""}> These are high-demand dates (festival or long weekend)</label>
+      <button class="btn m" data-approve="${b.id}"><span aria-hidden="true" class="ms">${a.best.amt?"send":"check"}</span>${a.best.amt?"Approve and send link":"Approve and confirm"}</button>
+      ${a.tier>=1&&!b.shared&&b.status!=="asked"?`<button class="btn o" data-ask="${b.id}"><span aria-hidden="true" class="ms">chat</span>Ask arrival time first</button>`:""}
+      ${b.status==="asked"?`<div class="sim"><div class="small"><span aria-hidden="true" class="ms" style="font-size:15px">science</span>Simulate the guest's reply</div>
+        <button class="btn o sm" data-reply="${b.id}">"Reaching around 7 pm, need an extra bed"</button><button class="btn o sm" data-silent="${b.id}">No reply for 24 hours</button></div>`:""}
+      <button class="link" data-trust="${b.id}">${a.trusted?"Remove from trusted guests":"Add to trusted guests"}</button>`:""}
+    ${["sent","lastcall","overdue","confirmed"].includes(b.status)&&(b.sentAmt||b.paid)?`<button class="btn o" data-guest="${b.id}"><span aria-hidden="true" class="ms">forum</span>See the guest's WhatsApp</button>`:""}
+    ${b.status==="sent"?`<div class="card" style="margin-top:12px"><label for="rate2" style="margin-top:0">Change the room rate (link already sent)</label>
+      <div style="display:flex;gap:8px"><input id="rate2" type="number" min="0" step="100" value="${b.rate}"><button class="btn o sm" id="resend" style="margin-top:0;width:auto;padding:9px 14px">Update and resend</button></div>
+      <div class="small" style="margin-top:4px">The old payment link is cancelled and the guest gets a new one, with a message explaining the new price.</div></div>
+      <div class="sim"><div class="small"><span aria-hidden="true" class="ms" style="font-size:15px">science</span>Simulate</div><button class="btn o sm" data-expire="${b.id}">Payment deadline passes</button></div>`:""}
+    ${["confirmed","arrived"].includes(b.status)&&b.paid?`<div class="note">Advance of ${rs(b.paid)} already paid. Any change to the room price is settled at the hotel.</div>`:""}
+    ${b.status==="confirmed"&&b.checkIn>today?`<div class="sim"><div class="small"><span aria-hidden="true" class="ms" style="font-size:15px">science</span>Simulate</div><button class="btn o sm" data-cancel="${b.id}">${esc(first(b.name))} cancels now</button></div>`:""}
+    <div class="card" style="margin-top:12px"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">route</span>Booking journey</div>${timeline(b)}</div>`;
+  const pk=$("peak"); if(pk) pk.onchange=()=>{b.peak=pk.checked;render();};
+  const rb=$("rateBtn"); if(rb) rb.onclick=()=>{const nr=+$("rate").value; if(!(nr>0)){toast("Enter a room rate above zero.");return;}
+    if(nr===b.rate){toast("Rate unchanged.");return;} const old=assess(b).best.amt, or=b.rate; b.rate=nr; const nu=assess(b).best.amt;
+    logIt("sell",`${first(b.name)}'s rate changed ${rs(or)} to ${rs(nr)}; advance ${rs(old)} to ${rs(nu)}`);
+    toast(`Rate ${rs(or)} → ${rs(nr)}. Advance updated ${old?rs(old):"none"} → ${nu?rs(nu):"none"}.`); render();};
+  const rs2=$("resend"); if(rs2) rs2.onclick=()=>{const nr=+$("rate2").value; if(!(nr>0)||nr===b.rate){toast("Enter a new room rate.");return;}
+    const or=b.rate, old=b.sentAmt; b.rate=nr; const a2=assess(b); b.sentAmt=a2.best.amt; b.sentTerms=a2.best.terms; b.sentDeadline=a2.deadline; b.aiMsg=null; b.priceChanged=true;
+    logIt("sync",`Old link cancelled; new link sent to ${first(b.name)} for ${rs(b.sentAmt)} (rate ${rs(or)} to ${rs(nr)})`);
+    toast(`New link sent: ${rs(old)} → ${rs(b.sentAmt)}. Old link cancelled.`); go("today",{type:"guest",id:b.id});};
+}
+function gMsg(b,amt,terms,deadline,lang){
+  const f=first(b.name), dates=`${fmtD(b.checkIn)} for ${b.nights} night${b.nights>1?"s":""}`;
+  if(lang==="hi") return amt?`नमस्ते ${f} जी, Hillview Stays में ${dates} के लिए आपके ${b.rooms} कमरे होल्ड हैं। बुकिंग पक्की करने के लिए कृपया ${rs(amt)} एडवांस ${deadline} दें।`:`नमस्ते ${f} जी, ${dates} के लिए आपकी बुकिंग पक्की है। कोई एडवांस नहीं चाहिए।`;
+  return amt?`Hi ${f}, your ${b.rooms} room${b.rooms>1?"s are":" is"} held at Hillview Stays for ${dates}. To confirm, please pay a ${rs(amt)} advance ${deadline}. ${terms}`:`Hi ${f}, your stay at Hillview Stays for ${dates} is confirmed. No advance needed. See you soon!`;
+}
+function vGuest(id){
+  const b=S.bookings.find(x=>x.id===id), a=assess(b), amt=b.sentAmt||b.paid||0;
+  title("Guest's WhatsApp");
+  const lang=b.lang||"en", terms=b.sentTerms||a.best.terms, msg=b.aiMsg||gMsg(b,amt,terms,b.sentDeadline||a.deadline,lang);
+  const paid=["confirmed","arrived"].includes(b.status)&&b.paid;
+  scr.innerHTML=`<button class="back" data-open="${b.id}"><span aria-hidden="true" class="ms">chevron_left</span>Booking</button>
+    <div class="two"><div><label for="lang">Language</label><select id="lang"><option value="en" ${lang==="en"?"selected":""}>English</option><option value="hi" ${lang==="hi"?"selected":""}>Hindi</option></select></div>
+    <div><label>&nbsp;</label><button class="btn o sm" id="ai" style="margin-top:0"><span aria-hidden="true" class="ms">auto_awesome</span>Rewrite with AI</button></div></div>
+    <div class="wa" style="margin-top:10px"><div class="hd"><span class="av" style="background:var(--peacock);width:32px;height:32px;flex-basis:32px;font-size:12px">HS</span>Hillview Stays</div>
+      <div class="bub">${esc(msg)}${amt&&!paid?`<button class="pay" data-pay="${b.id}"><span aria-hidden="true" class="ms" style="font-size:18px">lock</span>Confirm and pay ${rs(amt)}</button><div class="small" style="text-align:center;margin-top:4px">Secure payment link via Razorpay</div>`:""}</div>
+      ${b.lowered&&!paid?`<div class="bub">Thanks for letting us know. We've lowered your advance to ${rs(amt)}. Your earlier link has been cancelled; please use this one.</div>`:""}
+      ${b.priceChanged&&!paid?`<div class="bub">Update: as discussed, your room rate is now ${rs(b.rate)} a night, so your advance is ${rs(amt)}. Your earlier link has been cancelled; please use this one.</div>`:""}
+      ${b.status==="lastcall"?`<div class="bub">We couldn't confirm your advance, so we'll release your room in ${S.set.lastCallHrs} hours. Reply if you'd still like it.</div>`:""}
+      ${paid?`<div class="bub me">Paid ${rs(b.paid)} ✔</div><div class="bub">Thank you! Your booking is confirmed. Refund terms: ${esc(terms)}</div>`:""}
+    </div><div id="sheet"></div>
+    ${b.status==="sent"||b.status==="lastcall"?`<div class="sim"><div class="small"><span aria-hidden="true" class="ms" style="font-size:15px">science</span>Simulate the guest</div>
+      <button class="btn o sm" data-pay="${b.id}">Guest pays the advance</button><button class="btn o sm" data-decline="${b.id}">"The advance is too much"</button></div>`:""}`;
+  $("lang").onchange=e=>{b.lang=e.target.value;b.aiMsg=null;render();};
+  $("ai").onclick=async()=>{const s=await getSample(); if(!s){toast("AI writing isn't available in this view, so the template is used.");return;}
+    const btn=$("ai");btn.disabled=true;
+    try{const r=await s(`Write a short, warm WhatsApp message from a small Indian hotel, Hillview Stays, to a guest. Language: ${lang==="hi"?"Hindi":"English"}. Guest first name: ${first(b.name)}. Stay: ${fmtD(b.checkIn)}, ${b.nights} night(s), ${b.rooms} room(s). Advance: ${amt?rs(amt):"none"}. Terms: ${terms} Deadline: ${b.sentDeadline||a.deadline}. Under 55 words, polite, no pressure, no emojis, no invented discounts or facts, no link. Message text only.`,{modelTier:"quick"});
+      b.aiMsg=(r&&r.text||"").trim()||null;render();}catch(e){toast("AI writing failed, so the template is used.");btn.disabled=false;}};
+}
+function vCounter(id){
+  const b=S.bookings.find(x=>x.id===id), a=assess(b);
+  title("Guest pushed back");
+  const refundDate=new Date(Math.max(b.checkIn.getTime()-S.set.refundDays*DAY, today.getTime()+DAY));
+  const DROP2={none:0,ref1:0.06,non1:0.12,half:0.20,halfnight:0.03};
+  let cands=[...a.opts.filter(o=>o.amt>0&&o.amt<b.sentAmt),
+    {key:"halfnight",label:"Half a night, refundable",terms:`Advance of ${rs(a.nightly*0.5)}, fully refundable until ${fmtD(refundDate)}.`,amt:Math.round(a.nightly*0.5)}]
+    .filter((o,i,arr)=>o.amt<b.sentAmt&&arr.findIndex(x=>x.amt===o.amt&&x.key===o.key)===i);
+  cands.forEach(o=>{o.loss=a.p*(a.stay-o.amt)+DROP2[o.key]*a.stay*(1-a.p)*(1-a.resale);});
+  cands.sort((x,y)=>x.loss-y.loss);
+  const sug=cands[0];
+  scr.innerHTML=`<button class="back" data-back><span aria-hidden="true" class="ms">chevron_left</span>Today</button>
+    <div class="wa"><div class="hd"><span class="av" style="background:${avColor(b.name)};width:32px;height:32px;flex-basis:32px;font-size:12px">${initials(b.name)}</span>${esc(b.name)}</div>
+      <div class="bub me" style="margin-left:0;background:var(--card)">${rs(b.sentAmt)} advance is too much for us. Can you reduce it?</div></div>
+    <div class="card" style="margin-top:12px"><div class="small">Booking</div><div style="font-weight:700">${fmtD(b.checkIn)} · ${b.nights} night${b.nights>1?"s":""} · ${b.rooms} room${b.rooms>1?"s":""} · stay ${rs(a.stay)}</div>
+      <div class="small" style="margin-top:4px"><span class="pill p${a.tier}">${TN[a.tier]}</span> · ${Math.round(a.p*100)}% chance of a no-show or late cancellation</div></div>
+    ${sug?`<div class="reco"><div class="small" style="font-weight:700;color:var(--marigold-ink)">Room Guard suggests a smaller advance</div>
+      <div class="amt">${rs(sug.amt)}</div><div class="terms">${esc(sug.terms)}</div>
+      <div class="small" style="margin-top:6px">Keeps the booking while still protecting part of the stay. A refundable advance usually feels fair to guests.</div>
+      <button class="btn m" data-lower="${b.id}" data-amt="${sug.amt}" data-terms="${esc(sug.terms)}"><span aria-hidden="true" class="ms">send</span>Send ${rs(sug.amt)} advance instead</button></div>`:""}
+    <div class="card" style="margin-top:12px"><label for="camt" style="margin-top:0">Or choose your own amount</label>
+      <div style="display:flex;gap:8px"><input id="camt" type="number" min="0" step="100" value="${sug?sug.amt:0}"><button class="btn o sm" id="csend" style="margin-top:0;width:auto;padding:9px 14px">Send</button></div>
+      <div class="small" style="margin-top:4px">Custom amounts are refundable until ${fmtD(refundDate)}.</div></div>
+    <button class="btn o" data-noadv="${b.id}"><span aria-hidden="true" class="ms">check</span>Confirm without an advance</button>
+    <button class="btn o" data-letgo="${b.id}" style="color:var(--hibiscus)"><span aria-hidden="true" class="ms">person_off</span>Let the booking go</button>
+    <div class="note">Whatever you choose is recorded, so Room Guard learns how much guests at Hillview Stays are comfortable paying upfront.</div>`;
+  $("csend").onclick=()=>{const v=Math.max(0,Math.round(+$("camt").value||0)); if(v>=b.sentAmt){toast(`Enter an amount below ${rs(b.sentAmt)}.`);return;}
+    lowerAdvance(b,v,v?`Advance of ${rs(v)}, fully refundable until ${fmtD(refundDate)}.`:"");};
+}
+function lowerAdvance(b,amt,terms){
+  const old=b.sentAmt; S.imp.pushback=(S.imp.pushback||0)+1; S.edits.push(-1);
+  if(!amt){b.status="confirmed";b.paid=0;b.sentAmt=0;S.imp.saved=(S.imp.saved||0)+1;logIt("check",`${first(b.name)} pushed back; confirmed with no advance`);toast("Booking confirmed without an advance");return go("today");}
+  b.sentAmt=amt;b.sentTerms=terms;b.status="sent";b.aiMsg=null;b.lowered=true;b.priceChanged=false;
+  logIt("sync",`${first(b.name)} pushed back; old link cancelled, new link sent for ${rs(amt)} (was ${rs(old)})`);
+  toast(`New link sent for ${rs(amt)}. Old link cancelled.`); go("today",{type:"guest",id:b.id});
+}
+function vRelease(id){
+  const b=S.bookings.find(x=>x.id===id);
+  title("Unpaid advance");
+  const wl=S.waitlist.filter(w=>w.optIn&&!w.booked&&w.checkIn.getTime()===b.checkIn.getTime()).length;
+  scr.innerHTML=`<button class="back" data-back><span aria-hidden="true" class="ms">chevron_left</span>Today</button>
+    <div class="alert"><span aria-hidden="true" class="ms">error</span><div><div class="t">${esc(b.name)} hasn't paid the ${rs(b.sentAmt)} advance</div>
+      <div class="small">${fmtD(b.checkIn)} · ${b.nights} nights · ${b.rooms} room. The Razorpay link expired and a reminder went unanswered.</div></div></div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">route</span>What Room Guard has done</div>
+      <ul class="tl"><li class="done"><span aria-hidden="true" class="ms">check_circle</span>Sent the advance link with a ${S.set.deadlineHrs}-hour deadline</li>
+      <li class="done"><span aria-hidden="true" class="ms">check_circle</span>Sent a reminder before the deadline</li>
+      <li class="${b.status==="lastcall"?"done":"now"}"><span aria-hidden="true" class="ms">${b.status==="lastcall"?"check_circle":"radio_button_checked"}</span>Last call to the guest (${S.set.lastCallHrs} hours to reply)</li>
+      <li class="${b.status==="lastcall"?"now":""}"><span aria-hidden="true" class="ms">${b.status==="lastcall"?"radio_button_checked":"radio_button_unchecked"}</span>Your decision</li></ul></div>
+    ${b.status==="overdue"?`<button class="btn m" data-lastcall="${b.id}"><span aria-hidden="true" class="ms">campaign</span>Send last call</button>`:`
+      <div class="note">${wl?`<b>${wl} waitlisted guest${wl>1?"s":""}</b> want${wl>1?"":"s"} these dates and opted in to alerts.`:"No one on the waitlist wants these dates yet."} Releasing cancels the payment link so ${esc(first(b.name))} can't pay for a room that's gone.</div>
+      <button class="btn h" data-dorelease="${b.id}"><span aria-hidden="true" class="ms">door_open</span>Release the room</button>
+      <button class="btn o" data-moretime="${b.id}"><span aria-hidden="true" class="ms">more_time</span>Give 24 more hours</button>`}
+    <div class="note"><span aria-hidden="true" class="ms" style="font-size:16px;color:var(--leaf)">shield</span> Room Guard never cancels a booking that has been paid. It only releases holds where the advance wasn't paid.</div>`;
+}
+function vRefill(id){
+  const b=S.bookings.find(x=>x.id===id);
+  title("Room freed up");
+  const all=S.waitlist.filter(w=>w.checkIn.getTime()===b.checkIn.getTime());
+  const el=all.filter(w=>w.optIn).sort((x,y)=>x.askedOn-y.askedOn);
+  const kept=b.paid&&b.refundUntil<today;
+  scr.innerHTML=`<div class="alert"><span aria-hidden="true" class="ms">event_busy</span><div><div class="t">${esc(b.name)} ${b.status==="released"?"was released (unpaid)":"cancelled"}</div>
+      <div class="small">${fmtD(b.checkIn)}, ${dBetween(today,b.checkIn)} day${dBetween(today,b.checkIn)===1?"":"s"} before arrival. ${b.status==="released"?"No advance was paid.":kept?`${rs(b.paid)} advance kept: the refund window closed on ${fmtD(b.refundUntil)}.`:"Advance refunded per your terms."}</div></div></div>
+    <div class="sec"><span aria-hidden="true" class="ms" style="font-size:18px">hourglass_top</span>${el.length} waitlisted guest${el.length===1?"":"s"} can be offered this room</div>
+    ${el.map((w,i)=>`<div class="card"><div style="display:flex;gap:10px;align-items:center"><span class="av" style="background:${avColor(w.name)}">${initials(w.name)}</span>
+      <div style="flex:1"><div style="font-weight:700">${esc(w.name)} ${i===0?'<span class="pill p0">Asked first</span>':""}</div><div class="small">Wanted ${fmtD(w.checkIn)} · asked ${fmtD(w.askedOn)}</div></div></div>
+      ${w.booked?`<div class="state" style="color:var(--leaf);font-weight:700;margin-top:6px"><span aria-hidden="true" class="ms">check_circle</span> Booked, room refilled</div>`:w.offered?`<div class="small" style="margin-top:6px">Offer sent at your normal rate</div><button class="btn o sm" data-accept="${w.id}" data-for="${b.id}">Simulate: ${esc(first(w.name))} accepts</button>`:`<button class="btn m sm" data-offer="${w.id}"><span aria-hidden="true" class="ms">send</span>Offer room to ${esc(first(w.name))}</button>`}</div>`).join("")}
+    ${all.length>el.length?`<div class="small">${all.length-el.length} other guest${all.length-el.length===1?"":"s"} didn't opt in to alerts, so Room Guard won't message them.</div>`:""}
+    <button class="btn o" data-back><span aria-hidden="true" class="ms">today</span>Back to today</button>`;
+}
+function vNew(){
+  title("New booking");
+  const d=S.draft||{};
+  scr.innerHTML=`<button class="back" data-back><span aria-hidden="true" class="ms">chevron_left</span>Today</button>
+    <div class="card"><label for="note" style="margin-top:0">Voice note (transcript)</label>
+    <textarea id="note">${esc(d.note||`Karan Mehta, 98111 22334, two rooms from ${fmtD(addDays(10))} for 3 nights, four adults, agreed 3,000 a night, arriving late evening`)}</textarea>
+    <div class="two"><button class="btn o sm" id="rec"><span aria-hidden="true" class="ms">mic</span>Record (demo)</button><button class="btn m sm" id="parse"><span aria-hidden="true" class="ms">auto_awesome</span>Turn into booking</button></div>
+    <div class="small" id="pinfo" style="margin-top:6px"></div></div><div id="form"></div>`;
+  $("rec").onclick=()=>{$("note").value=`Neha Joshi, 97777 88990, one room on ${fmtD(addDays(5))} for 1 night, two adults, rate 2,800`;toast("Voice note captured");};
+  $("parse").onclick=parseNote; if(d.f) drawForm(d.f);
+}
+function offline(t){
+  const f={name:"",phone:"",rooms:1,nights:1,rate:3000,checkIn:addDays(7),shared:false}, W={one:1,two:2,three:3,four:4,five:5,six:6};
+  const nm=t.match(/^\s*([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/); if(nm)f.name=nm[1];
+  const ph=t.match(/(\d{5})\s?(\d{5})/); if(ph)f.phone=ph[1]+" "+ph[2];
+  const rm=t.match(/(\d+|one|two|three|four|five)\s+rooms?/i); if(rm)f.rooms=+rm[1]||W[rm[1].toLowerCase()];
+  const nt=t.match(/(\d+|one|two|three|four|five|six)\s+nights?/i); if(nt)f.nights=+nt[1]||W[nt[1].toLowerCase()];
+  const rt=t.match(/(\d{1,2},?\d{3})\s*(?:a|per)?\s*night|rate\s*(\d{1,2},?\d{3})|agreed\s*(\d{1,2},?\d{3})/i); if(rt)f.rate=+(rt[1]||rt[2]||rt[3]).replace(",","");
+  const dt=t.match(/(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*/i);
+  if(dt){const mo=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"].indexOf(dt[2].toLowerCase());let x=new Date(today.getFullYear(),mo,+dt[1]);if(x<today)x.setFullYear(x.getFullYear()+1);f.checkIn=x;}
+  f.shared=/arriv|late|early|request|parking|\bpm\b|\bam\b|extra bed/i.test(t); return f;
+}
+async function parseNote(){
+  const t=$("note").value.trim(), info=$("pinfo"); if(!t){info.textContent="Add the booking details first, by voice or text.";return;}
+  info.textContent="Reading the note..."; let f=null; const s=await getSample();
+  if(s){try{const j=await s.json(`Extract a hotel booking from this note by a hotel owner in India. Today is ${today.toISOString().slice(0,10)}. Note: """${t}""". Return JSON only with keys: name, phone (digits, space after 5), checkIn (YYYY-MM-DD, next future occurrence), nights (int), rooms (int), rate (int rupees per room per night, 0 if unknown), shared (true if the guest gave an arrival time or a request). Never invent a name or phone; use "" or 0 when unknown.`,{modelTier:"quick"});
+    if(j&&j.checkIn){f={name:j.name||"",phone:j.phone||"",checkIn:new Date(j.checkIn+"T00:00:00"),nights:+j.nights||1,rooms:+j.rooms||1,rate:+j.rate||3000,shared:!!j.shared};info.textContent="Read by AI. Check the details before saving.";}}catch(e){f=null;}}
+  if(!f){f=offline(t);info.textContent=s?"AI couldn't read it, so the offline reader filled what it could. Check the details.":"Filled by the offline reader (AI isn't available in this view). Check the details.";}
+  S.draft={note:t,f}; drawForm(f);
+}
+function drawForm(f){
+  const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const known=S.bookings.find(b=>b.phone===f.phone);
+  $("form").innerHTML=`<div class="card"><div class="two">
+    <div><label for="fn">Guest name</label><input id="fn" value="${esc(f.name)}"></div><div><label for="fp">Phone</label><input id="fp" value="${esc(f.phone)}"></div>
+    <div><label for="fi">Check-in</label><input id="fi" type="date" value="${iso(f.checkIn)}"></div><div><label for="fnt">Nights</label><input id="fnt" type="number" min="1" value="${f.nights}"></div>
+    <div><label for="fr">Rooms</label><input id="fr" type="number" min="1" value="${f.rooms}"></div><div><label for="frt">Rate a night</label><input id="frt" type="number" min="0" step="100" value="${f.rate}"></div></div>
+    <label class="check"><input type="checkbox" id="fs" ${f.shared?"checked":""}> Guest shared an arrival time or a request</label>
+    <label class="check"><input type="checkbox" id="frp" ${known?"checked":""}> Has stayed with us before</label>
+    <label class="check"><input type="checkbox" id="fpc"> Cancelled late or didn't show before</label>
+    <button class="btn" id="save"><span aria-hidden="true" class="ms">shield</span>Save and check risk</button>
+    <button class="btn o" id="wait"><span aria-hidden="true" class="ms">hourglass_top</span>We're full: add to waitlist</button></div>`;
+  const rd=()=>({name:$("fn").value.trim()||"Guest",phone:$("fp").value.trim(),checkIn:new Date($("fi").value+"T00:00:00"),nights:Math.max(1,+$("fnt").value||1),rooms:Math.max(1,+$("fr").value||1),rate:+$("frt").value||0,shared:$("fs").checked,repeat:$("frp").checked,prevCancel:$("fpc").checked});
+  $("save").onclick=()=>{const r=rd(); if(!(r.checkIn>=today)){toast("Pick a check-in date from today onwards.");return;}
+    const b={id:S.nextId++,...r,noReply:false,peak:false,status:"pending",bookedOn:today}; S.bookings.unshift(b); S.draft=null; logIt("edit_calendar",`New booking from voice note: ${b.name}`); go("today",{type:"booking",id:b.id});};
+  $("wait").onclick=()=>{const r=rd(); S.waitlist.push({id:S.nextId++,name:r.name,phone:r.phone,checkIn:r.checkIn,nights:r.nights,rooms:r.rooms,askedOn:today,optIn:true}); S.draft=null; logIt("hourglass_top",`${r.name} added to waitlist (opted in)`); toast(`${r.name} added to the waitlist`); go("waitlist");};
+}
+function vWaitlist(){
+  title("Waitlist");
+  scr.innerHTML=`<div class="note" style="margin-top:0">Guests you had to turn away. When a room frees up, Room Guard offers it to people who opted in, earliest request first, at your normal rate.</div>
+    ${S.waitlist.map(w=>`<div class="bk t0" style="border-left-color:${w.optIn?"var(--leaf)":"var(--line)"}"><span class="av" style="background:${avColor(w.name)}">${initials(w.name)}</span><span class="main">
+      <span class="r1"><span class="name">${esc(w.name)}</span><span class="pill ${w.optIn?"p0":"pn"}">${w.optIn?"Opted in":"Not opted in"}</span></span>
+      <span class="meta" style="display:block">Wants ${fmtD(w.checkIn)} · ${w.nights} night${w.nights>1?"s":""} · ${w.rooms} room</span>
+      <span class="state">Asked ${fmtD(w.askedOn)}${w.offered?" · offered":""}${w.booked?" · booked":""}</span></span></div>`).join("")}`;
+}
+function vImpact(){
+  title("Impact");
+  const I=S.imp, over=S.edits.filter(e=>e<0).length;
+  scr.innerHTML=`<div class="small" style="margin-bottom:8px">This month · sample data plus your actions in this demo</div>
+    <div class="stats"><div class="stat s1"><b>${rs(I.collected)}</b><span>Advances collected</span></div>
+      <div class="stat s2"><b>${I.refilled}</b><span>Rooms refilled (${rs(I.refillRev)})</span></div>
+      <div class="stat s3"><b>${I.arrived}</b><span>Guests checked in</span></div>
+      <div class="stat s4"><b>${I.saved||0}</b><span>Bookings kept after a smaller advance</span></div></div>
+    <div class="card" style="margin-top:12px"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">school</span>What Room Guard is learning</div>
+      <div class="small" style="margin-bottom:6px">${I.outcomes} outcomes recorded at Hillview Stays</div>
+      <ul class="reasons"><li><span>Predicted vs actual late-cancel and no-show rate (last 30 bookings, sample)</span><span>7% vs 6%</span></li>
+      <li><span>Guests who walked away when asked for one night refundable (sample)</span><span>1 of 12</span></li>
+      <li><span>Guests who pushed back on the advance</span><span>${I.pushback||0} (${I.saved||0} kept)</span></li>
+      <li><span>Bookings let go after pushback</span><span>${I.dropped}</span></li>
+      <li><span>No-shows this month</span><span>${I.noshows}</span></li></ul>
+      ${over>=2?`<div class="note"><span aria-hidden="true" class="ms" style="color:var(--indigo)">lightbulb</span> You lowered ${over} recommended advances. Make smaller advances your default for medium-risk guests? <button class="link" data-softer>Yes, adjust</button></div>`:""}
+    </div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">science</span>How impact is proven</div>
+      <div class="small">In a live pilot, 1 in 10 direct bookings follows your usual rule instead of Room Guard. Comparing realised revenue per direct booking, no-shows and guest drop-offs between the two groups shows what Room Guard really added.</div></div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">history</span>Activity log</div>
+      <ul class="log">${S.log.slice(0,12).map(l=>`<li><span aria-hidden="true" class="ms">${l.icon}</span><span style="flex:1">${esc(l.t)}</span><span class="small">${l.when}</span></li>`).join("")}</ul></div>`;
+}
+function vControls(){
+  title("Controls");
+  const s=S.set;
+  scr.innerHTML=`<div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">smart_toy</span>Agent</div>
+    <label class="check"><input type="checkbox" id="c_on" ${s.agentOn?"checked":""}> Room Guard is on</label>
+    <label class="check"><input type="checkbox" id="c_rev" ${s.review?"checked":""}> Review every advance before it's sent</label>
+    <div class="small">When review is off, these can run on their own:</div>
+    <label class="check"><input type="checkbox" id="c_ar" ${s.autoReminders?"checked":""}> Payment reminders and 48-hour arrival checks</label>
+    <label class="check"><input type="checkbox" id="c_al" ${s.autoLowRisk?"checked":""}> Confirm low-risk guests with no advance</label>
+    <label class="check"><input type="checkbox" id="c_arl" ${s.autoRelease?"checked":""}> Release unpaid rooms after the last call</label></div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">policy</span>Your policy</div>
+    <label for="c_max">Maximum advance: <b id="c_maxv">${s.maxPct}%</b> of the stay</label><input id="c_max" type="range" min="10" max="100" step="5" value="${s.maxPct}">
+    <div class="two"><div><label for="c_rd">Refundable until (days before)</label><select id="c_rd">${[3,5,7,14].map(n=>`<option ${n===s.refundDays?"selected":""}>${n}</option>`).join("")}</select></div>
+    <div><label for="c_dl">Payment deadline (hours)</label><select id="c_dl">${[24,48,72].map(n=>`<option ${n===s.deadlineHrs?"selected":""}>${n}</option>`).join("")}</select></div>
+    <div><label for="c_lc">Last-call window (hours)</label><select id="c_lc">${[2,6,12].map(n=>`<option ${n===s.lastCallHrs?"selected":""}>${n}</option>`).join("")}</select></div>
+    <div><label for="c_co">No-show cut-off</label><select id="c_co">${["9:00 pm","11:59 pm","10:00 am next day"].map(n=>`<option ${n===s.cutoff?"selected":""}>${n}</option>`).join("")}</select></div></div>
+    <label class="check"><input type="checkbox" id="c_pk" ${s.peakDates?"checked":""}> Treat upcoming dates as high demand (festival season)</label></div>
+    <div class="card"><div class="sec" style="margin-top:0"><span aria-hidden="true" class="ms" style="font-size:18px">verified_user</span>Trusted guests (never asked for an advance)</div>
+    ${S.trusted.map(p=>{const b=S.bookings.find(x=>x.phone===p);return `<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:4px 0"><span>${esc(b?b.name:p)}</span><button class="link" data-untrust="${esc(p)}">Remove</button></div>`;}).join("")||'<div class="small">No trusted guests yet.</div>'}</div>
+    <div class="note"><span aria-hidden="true" class="ms" style="font-size:16px;color:var(--leaf)">shield</span> Always on: Room Guard never blocks a booking, never cancels a paid booking, never exceeds your maximum advance, and only messages waitlisted guests who opted in.</div>`;
+  const bind=(id,fn)=>$(id).onchange=e=>{fn(e.target);go("controls");};
+  bind("c_on",t=>s.agentOn=t.checked); bind("c_rev",t=>s.review=t.checked); bind("c_ar",t=>s.autoReminders=t.checked); bind("c_al",t=>s.autoLowRisk=t.checked); bind("c_arl",t=>s.autoRelease=t.checked);
+  bind("c_rd",t=>s.refundDays=+t.value); bind("c_dl",t=>s.deadlineHrs=+t.value); bind("c_lc",t=>s.lastCallHrs=+t.value); bind("c_co",t=>s.cutoff=t.value); bind("c_pk",t=>s.peakDates=t.checked);
+  $("c_max").oninput=e=>{s.maxPct=+e.target.value;$("c_maxv").textContent=s.maxPct+"%";};
+}
+
+/* ===== Actions ===== */
+scr.addEventListener("click",e=>{
+  const t=e.target.closest("button"); if(!t) return; const d=t.dataset, B=id=>S.bookings.find(x=>x.id===+id);
+  if(d.goto) return go(d.goto);
+  if("back" in d) return go("today");
+  if(d.open) return go("today",{type:"booking",id:+d.open});
+  if(d.guest) return go("today",{type:"guest",id:+d.guest});
+  if(d.release) return go("today",{type:"release",id:+d.release});
+  if(d.trust){const b=B(d.trust),i=S.trusted.indexOf(b.phone);i>=0?S.trusted.splice(i,1):S.trusted.push(b.phone);logIt("verified_user",`${b.name} ${i>=0?"removed from":"added to"} trusted guests`);return render();}
+  if(d.untrust){S.trusted=S.trusted.filter(p=>p!==d.untrust);return render();}
+  if(d.ask){const b=B(d.ask);b.status="asked";logIt("chat",`Asked ${first(b.name)} for an arrival time`);toast(`Asked ${first(b.name)} for an arrival time on WhatsApp`);return render();}
+  if(d.reply){const b=B(d.reply),before=assess(b);b.shared=true;b.noReply=false;b.status="pending";const after=assess(b);logIt("chat",`${first(b.name)} replied with an arrival time`);
+    toast(`Risk fell from ${Math.round(before.p*100)}% to ${Math.round(after.p*100)}%. Advance: ${after.best.amt?rs(after.best.amt):"none needed"}`);return render();}
+  if(d.silent){const b=B(d.silent);b.noReply=true;b.status="pending";const a=assess(b);logIt("chat",`${first(b.name)} didn't reply in 24 hours`);toast(`No reply: risk rose to ${Math.round(a.p*100)}%`);return render();}
+  if(d.approve){const b=B(d.approve),a=assess(b),amt=Math.max(0,+($("amt")?.value??a.best.amt));
+    if(Math.round(amt)!==Math.round(a.best.amt)) S.edits.push(Math.sign(amt-a.best.amt));
+    b.sentAmt=amt;b.sentTerms=a.best.terms;b.sentDeadline=a.deadline;
+    if(!amt){b.status="confirmed";b.paid=0;logIt("check",`${b.name} confirmed with no advance`);toast("Booking confirmed with no advance");return go("today");}
+    b.status="sent";S.imp.links++;logIt("send",`Advance link sent to ${first(b.name)} (${rs(amt)})`);toast("Advance link sent on WhatsApp");return go("today",{type:"guest",id:b.id});}
+  if(d.pay){const b=B(d.pay);if(!["sent","lastcall"].includes(b.status))return;
+    $("sheet").innerHTML=`<div class="paysheet"><div style="display:flex;justify-content:space-between;align-items:center"><b>Hillview Stays</b><span class="small">Razorpay (simulated)</span></div>
+      <div style="font-family:'Bricolage Grotesque';font-size:28px;font-weight:800;margin:6px 0">${rs(b.sentAmt)}</div><div class="small">${esc(b.sentTerms||"")}</div>
+      <div class="upi" role="group" aria-label="Pay with"><button aria-pressed="true" type="button">UPI app</button><button type="button">Card</button><button type="button">Netbanking</button></div>
+      <button class="btn" data-paid="${b.id}"><span aria-hidden="true" class="ms">lock</span>Pay ${rs(b.sentAmt)}</button></div>`;return;}
+  if(d.paid){const b=B(d.paid);if(b.lowered)S.imp.saved=(S.imp.saved||0)+1;b.status="confirmed";b.paid=b.sentAmt;b.refundUntil=new Date(b.checkIn.getTime()-S.set.refundDays*DAY);S.imp.collected+=b.sentAmt;logIt("payments",`${first(b.name)} paid ${rs(b.sentAmt)} advance`);toast(`${rs(b.sentAmt)} received. Booking confirmed.`);return render();}
+  if(d.decline){const b=B(d.decline);b.status="pushback";logIt("forum",`${first(b.name)} said the advance is too much; sent to you`);toast(`${first(b.name)} pushed back. Sent to you to decide.`);return go("today");}
+  if(d.counter) return go("today",{type:"counter",id:+d.counter});
+  if(d.lower){const b=B(d.lower);return lowerAdvance(b,+d.amt,d.terms);}
+  if(d.noadv){const b=B(d.noadv);return lowerAdvance(b,0,"");}
+  if(d.letgo){const b=B(d.letgo);b.status="dropped";S.imp.dropped++;S.imp.outcomes++;logIt("person_off",`Let ${first(b.name)}'s booking go after pushback`);toast("Booking let go. Outcome recorded for learning.");return go("today",{type:"refill",id:b.id});}
+  if(d.expire){const b=B(d.expire);b.status="overdue";logIt("error",`${first(b.name)}'s payment link expired`);return go("today",{type:"release",id:b.id});}
+  if(d.lastcall){const b=B(d.lastcall);b.status="lastcall";logIt("campaign",`Last call sent to ${first(b.name)}`);toast("Last call sent on WhatsApp");return render();}
+  if(d.moretime){const b=B(d.moretime);b.status="sent";logIt("more_time",`Gave ${first(b.name)} 24 more hours`);toast("Deadline extended by 24 hours");return go("today");}
+  if(d.dorelease){const b=B(d.dorelease);b.status="released";S.imp.released++;S.imp.outcomes++;logIt("door_open",`Released ${first(b.name)}'s unpaid room; payment link cancelled`);toast("Room released and payment link cancelled");return go("today",{type:"refill",id:b.id});}
+  if(d.cancel){const b=B(d.cancel);b.status="cancelled";S.imp.outcomes++;logIt("cancel",`${b.name} cancelled ${dBetween(today,b.checkIn)} days before arrival`);return go("today",{type:"refill",id:b.id});}
+  if(d.offer){const w=S.waitlist.find(x=>x.id===+d.offer);w.offered=true;logIt("send",`Room offered to ${first(w.name)} from the waitlist`);toast(`Room offered to ${first(w.name)} on WhatsApp`);return render();}
+  if(d.accept){const w=S.waitlist.find(x=>x.id===+d.accept),b=B(d.for),rev=b.rate*w.rooms*w.nights;w.booked=true;S.imp.refilled++;S.imp.refillRev+=rev;
+    S.bookings.unshift({id:S.nextId++,name:w.name,phone:w.phone,checkIn:w.checkIn,nights:w.nights,rooms:w.rooms,rate:b.rate,repeat:false,prevCancel:false,shared:true,noReply:false,peak:false,status:"pending",bookedOn:today});
+    logIt("autorenew",`${first(w.name)} booked the freed room (${rs(rev)} recovered)`);toast(`${first(w.name)} booked the room. ${rs(rev)} recovered.`);return render();}
+  if(d.arrive){const b=B(d.arrive);b.status="arrived";S.imp.arrived++;S.imp.outcomes++;logIt("hotel",`${b.name} checked in`);toast("Checked in. Outcome recorded for learning.");return render();}
+  if(d.noshow){const b=B(d.noshow);b.status="noshow";S.imp.noshows++;S.imp.outcomes++;logIt("no_accounts",`${b.name} marked no-show; ${rs(b.paid)} advance kept per terms`);toast(`No-show recorded. ${b.nights>1?"Remaining nights released to the waitlist.":"Outcome recorded for learning."}`);return render();}
+  if("softer" in d){S.set.maxPct=Math.max(10,S.set.maxPct-10);S.edits=[];logIt("tune","Default advance softened after your edits");toast("Adjusted: smaller advances by default");return render();}
+});
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+$("fab").onclick=()=>{S.draft=null;go("today",{type:"newb"});};
+go("welcome");
+</script>
+</body>
+</html>
